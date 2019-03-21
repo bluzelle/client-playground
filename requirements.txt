@@ -1,0 +1,6 @@
+urlparse2
+requests
+requests[security]
+redis
+aiohttp
+aiofiles
