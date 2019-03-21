@@ -9,12 +9,12 @@ PYTHONL = `python3-config --ldflags`
 
 all:
 	$(shell mkdir -p $(LIB))
-	$(shell cp $(SRC)/lib.h $(LIB))
+	$(shell cp $(SRC)/libdb.h $(LIB))
 	$(shell mkdir -p $(LIB))
-	$(CC) $(FLAGS) -c $(SRC)/lib.cpp -o $(LIB)/lib.o
-	swig -c++ -python -o $(LIB)/lib_wrap.cxx $(SRC)/lib.i
-	$(CC) $(FLAGS) $(PYTHONI) -c $(LIB)/lib_wrap.cxx -o $(LIB)/lib_wrap.o
-	$(CC) $(PYTHONL) $(LIBFLAGS) -shared $(LIB)/lib.o $(LIB)/lib_wrap.o -o $(LIB)/_lib.so
+	$(CC) $(FLAGS) -c $(SRC)/libdb.cpp -o $(LIB)/libdb.o
+	swig -c++ -python -o $(LIB)/libdb_wrap.cxx $(SRC)/libdb.i
+	$(CC) $(FLAGS) $(PYTHONI) -c $(LIB)/libdb_wrap.cxx -o $(LIB)/libdb_wrap.o
+	$(CC) $(PYTHONL) $(LIBFLAGS) -shared $(LIB)/libdb.o $(LIB)/libdb_wrap.o -o $(LIB)/_libdb.so
 
 clean:
 	-rm -rf $(LIB)

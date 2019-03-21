@@ -1,11 +1,11 @@
-%module(directors="1") lib
+%module(directors="1") libdb
 
 %{
-#include "lib.h"
+#include "libdb.h"
 
 %}
 
 /* turn on director wrapping Callback */
 %feature("director") Callback;
 
-%include "lib.h"
+%include "libdb.h"
