@@ -7,15 +7,17 @@ sys.path.extend([os.getcwd()])
 from lib import libdb
 db = libdb.DB()
 
+GET_TIMEOUT = 2 * 1000
+
 async def slowGet():
-    await asyncio.sleep(1)
+    await db.slowGet(GET_TIMEOUT)
 
 async def main():
     await slowGet()
 
 
-asyncio.run(main(), debug=True)
-
+#asyncio.run(main(), debug=True)
+db.slowGet(GET_TIMEOUT)
 
 class PyCallback(libdb.Callback):
 
