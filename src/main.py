@@ -1,4 +1,9 @@
+import sys
+import os
 import asyncio
+
+sys.path.extend([os.getcwd()])
+
 from lib import lib
 
 async def get():
