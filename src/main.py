@@ -1,5 +1,5 @@
 import asyncio
-from lib.lib import lib
+from lib import lib
 
 async def get():
     await asyncio.sleep(1)
@@ -7,9 +7,60 @@ async def get():
 async def main():
     print('Hello ...')
     await get()
-    lib().m2()
+    lib.lib().m1()
     print('... World!')
 
 
-
 asyncio.run(main())
+
+
+class PyCallback(lib.Callback):
+
+    def __init__(self):
+        lib.Callback.__init__(self)
+
+    def run(self):
+        print ("PyCallback.run()")
+
+# Create an Caller instance
+
+caller = lib.lib()
+
+# Add a simple C++ callback (caller owns the callback, so
+# we disown it first by clearing the .thisown flag).
+
+print ("Adding and calling a normal C++ callback")
+print ("----------------------------------------")
+
+callback = lib.Callback()
+callback.thisown = 0
+caller.setCallback(callback)
+caller.call()
+caller.delCallback()
+
+print()
+print ("Adding and calling a Python callback")
+print ("------------------------------------")
+
+# Add a Python callback (caller owns the callback, so we
+# disown it first by calling __disown__).
+
+caller.setCallback(PyCallback().__disown__())
+caller.call()
+caller.delCallback()
+
+print()
+print ("Adding and calling another Python callback")
+print ("------------------------------------------")
+
+# Let's do the same but use the weak reference this time.
+
+callback = PyCallback().__disown__()
+caller.setCallback(callback)
+caller.call()
+caller.delCallback()
+
+# All done.
+
+print()
+print ("python exit")

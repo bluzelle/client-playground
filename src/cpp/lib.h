@@ -1,17 +1,31 @@
-#include <stdio.h>
 #include <future>
+#include <iostream>
+
+class Callback {
+public:
+	virtual ~Callback() { std::cout << "Callback::~Callback()" << std:: endl; }
+	virtual void run() { std::cout << "Callback::run()" << std::endl; }
+};
 
 class lib
 {
-  public:
-    lib();
-    ~lib();
-
-    void m1();
-    void m2() { printf("from m2 \n"); }
-    // static int called_from_async();
-    // std::future<int> start_async();
 
   private:
-    int variable;
+	Callback *_callback;
+
+  public:
+    lib(): _callback(0) {std::cout << "lib::lib() Constructor"<< std:: endl;}
+    ~lib() {std::cout << "lib::~lib() Destructor"<< std:: endl; delCallback();}
+    void delCallback() { delete _callback; _callback = 0; }
+    void setCallback(Callback *cb) {
+        std::cout << "lib::setCallback() -> setting callback "<< std:: endl;
+        delCallback(); _callback = cb;
+    }
+
+    void call() {
+        std::cout << "lib::call() Trying to call host code ... "<< std:: endl;
+        if (_callback) _callback->run();
+    }
+    void m1();
+
 };
