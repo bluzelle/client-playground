@@ -1,8 +1,13 @@
+# https://github.com/aio-libs - more libs here
 import sys
 import os
 import asyncio
 import concurrent.futures
 import time
+import uvloop
+
+uvloop.install()
+
 
 sys.path.extend([os.getcwd()])
 

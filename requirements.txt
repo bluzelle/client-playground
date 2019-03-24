@@ -4,3 +4,4 @@ requests[security]
 redis
 aiohttp
 aiofiles
+uvloop
