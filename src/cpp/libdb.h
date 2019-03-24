@@ -16,8 +16,7 @@ class DB
 	Callback *_callback;
 
   public:
-    DB(): _callback(0) {
-    }
+    DB(): _callback(0) {}
     ~DB() {delCallback();}
     void delCallback() { delete _callback; _callback = 0; }
     void setCallback(Callback *cb) {
@@ -27,6 +26,6 @@ class DB
     void call() {
         if (_callback) _callback->run();
     }
-    void slowGet(int milliseconds);
+    int slowGet(int milliseconds);
 
 };

@@ -22,7 +22,9 @@ def slowDBCommand(cpp_timeout):
 
 async def get(cpp_timeout):
     loop = asyncio.get_event_loop()
-    await loop.run_in_executor(executor, slowDBCommand, cpp_timeout)
+    result = await loop.run_in_executor(executor, slowDBCommand, cpp_timeout)
+    print("db_call_result = ", result)
+    return result
 
 async def main(tasks):
     await asyncio.gather(*tasks, return_exceptions=True)
