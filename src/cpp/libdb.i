@@ -1,11 +1,9 @@
-%module(directors="1") libdb
+%module libdb
 
 %{
 #include "libdb.h"
+#include "boost/asio.hpp"
 
 %}
-
-/* turn on director wrapping Callback */
-%feature("director") Callback;
 
 %include "libdb.h"
