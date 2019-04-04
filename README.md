@@ -1,4 +1,3 @@
-
 ### Building the example
 
 #### OSX
@@ -18,3 +17,7 @@ $ cd build
 $ ~/mycmake/bin/cmake .. -DPYTHON=ON -DGOLANG=OFF
 $ sudo cmake --build .
 ```
+
+### Running
+
+To run the golang version, stat
