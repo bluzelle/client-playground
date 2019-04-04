@@ -21,4 +21,4 @@ $ sudo cmake --build .
 ### Running
 
 Golang version: start `golang_run.sh`
-Python version: start `golang_run.sh`
+Python version: start `py_run.sh`
