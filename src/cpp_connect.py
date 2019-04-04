@@ -1,4 +1,5 @@
 # https://github.com/aio-libs - more libs here
+from build import libdb
 import sys
 import os
 import asyncio
@@ -10,13 +11,14 @@ uvloop.install()
 
 sys.path.extend([os.getcwd()])
 
-from build import libdb
 
 per_process_main_db_singleton = None
+
 
 def init(db_config):
     global per_process_main_db_singleton
     per_process_main_db_singleton = libdb.DB()
+
 
 def slowDBCommand(cpp_timeout):
     try:
@@ -25,25 +27,27 @@ def slowDBCommand(cpp_timeout):
     except Exception as e:
         print(e)
 
+
 async def get(cpp_timeout):
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(executor, slowDBCommand, cpp_timeout)
     print("db_call_result = ", result)
     return result
 
+
 async def main(tasks):
     await asyncio.gather(*tasks, return_exceptions=True)
 
 
 max_workers = 4
-executor = concurrent.futures.ProcessPoolExecutor(max_workers=max_workers, initializer = lambda: init("per_process_db_config"))
+executor = concurrent.futures.ProcessPoolExecutor(
+    max_workers=max_workers, initializer=lambda: init("per_process_db_config"))
 
 tic = time.time()
 timeout_in_cpp = [5, 3]
 tasks = [get(cpp_timeout=i) for i in timeout_in_cpp]
 asyncio.run(main(tasks))
 print("thread pool python -> blocking cpp async call took:", time.time() - tic)
-
 
 
 async def get_via_socket():
@@ -59,12 +63,15 @@ async def get_via_socket():
     writer.close()
 
 
+tasks = [get_via_socket(), get(cpp_timeout=5)]
+
+
 async def socket_main(tasks):
     await asyncio.gather(*tasks, return_exceptions=True)
 
-tasks = [get_via_socket(), get_via_socket()]
 
 # initializes the socket thread
 libdb.DB().listen_many()
-
+tic = time.time()
 asyncio.run(socket_main(tasks))
+print("Two calls with 5 sec blocks took", time.time() - tic)
