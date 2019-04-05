@@ -63,7 +63,11 @@ async def get_via_socket():
     writer.close()
 
 
-tasks = [get_via_socket(), get(cpp_timeout=5)]
+async def get2(cpp_timeout):
+    await asyncio.sleep(cpp_timeout)
+
+
+tasks = [get_via_socket(), get2(cpp_timeout=5)]
 
 
 async def socket_main(tasks):
