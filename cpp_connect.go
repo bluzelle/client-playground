@@ -5,7 +5,7 @@ import (
 	"time"
 	"bufio"
  	"net"
-	"github.com/yarco/swig-playground/libdb"
+	"github.com/yarco/swig-playground/build"
 )
 
 func blocking_cpp_goroutines() {
@@ -63,6 +63,6 @@ func sockets() {
 }
 
 func main() {
-	sockets()
+	//sockets()
 	blocking_cpp_goroutines()
 }

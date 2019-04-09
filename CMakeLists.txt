@@ -12,6 +12,7 @@ message("Build a Golang Wrapper? ${GOLANG}")
 
 
 if(PYTHON)
+    set(ASYNC_API TRUE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pthread -std=c++14 -Wall -Wextra -Wno-unused-parameter")
     if(PYTHONLIBS_VERSION_STRING MATCHES "^2.*$" )
         set(CMAKE_SWIG_FLAGS -classic)
@@ -21,6 +22,7 @@ if(PYTHON)
 endif()
 
 if(GOLANG)
+    set(ASYNC_API FALSE)
     set(CMAKE_SWIG_FLAGS -c++ -cgo -intgosize 64)
 endif()
 
@@ -43,21 +45,27 @@ message("CMAKE_SWIG_FLAGS: ${CMAKE_SWIG_FLAGS}")
 include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(libdb ${PYTHON_INCLUDE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(libdb ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp)
 
-add_library(libdbImpl SHARED src/cpp/libdb.cpp src/cpp/libdb.h)
+if(ASYNC_API)
+    add_library(libdbImpl SHARED src/cpp/async/libdb.cpp src/cpp/async/libdb.h)
+    set_source_files_properties(src/cpp/async/libdb.i PROPERTIES CPLUSPLUS ON)
+    include_directories(libdb ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/async)
+else()
+    add_library(libdbImpl SHARED src/cpp/blocking/libdb.cpp src/cpp/blocking/libdb.h)
+    set_source_files_properties(src/cpp/blocking/libdb.i PROPERTIES CPLUSPLUS ON)
+    include_directories(libdb ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/blocking)
+endif()
+
 target_compile_features(libdbImpl PUBLIC cxx_std_14)
 
-set_source_files_properties(src/cpp/libdb.i PROPERTIES CPLUSPLUS ON)
-
 if(PYTHON)
-    swig_add_library(libdb TYPE SHARED LANGUAGE python SOURCES src/cpp/libdb.i)
+    swig_add_library(libdb TYPE SHARED LANGUAGE python SOURCES src/cpp/async/libdb.i)
     swig_link_libraries(libdb ${PYTHON_LIBRARIES} libdbImpl)
     set_target_properties(_libdb PROPERTIES SUFFIX ".so")
 endif()
 
 if(GOLANG)
-    swig_add_library(libdb TYPE SHARED LANGUAGE go SOURCES src/cpp/libdb.i)
+    swig_add_library(libdb TYPE SHARED LANGUAGE go SOURCES src/cpp/blocking/libdb.i)
     swig_link_libraries(libdb libdbImpl)
 endif()
 

@@ -7,6 +7,8 @@ __pycache__/
 
 # C extensions
 *.so
+cmake-build-debug
+swig-playground
 
 # Distribution / packaging
 .Python

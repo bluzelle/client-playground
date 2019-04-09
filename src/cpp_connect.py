@@ -1,5 +1,4 @@
 # https://github.com/aio-libs - more libs here
-from build import libdb
 import sys
 import os
 import asyncio
@@ -11,6 +10,7 @@ uvloop.install()
 
 sys.path.extend([os.getcwd()])
 
+from build import libdb
 
 per_process_main_db_singleton = None
 

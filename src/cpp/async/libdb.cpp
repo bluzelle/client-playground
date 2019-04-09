@@ -17,14 +17,6 @@ using std::cout;
 using std::endl;
 using std::string;
 
-int DB::slowGet(int milliseconds)
-{
-    std::cout << "DB::slowGet() sleep START, obj_id =  " + std::to_string(reinterpret_cast<long>(this)) << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-    std::cout << "DB::slowGet() sleep STOP, obj_id =  " + std::to_string(reinterpret_cast<long>(this)) << std::endl;
-    return 5;
-}
-
 class session
 {
   public:
@@ -143,4 +135,96 @@ void DB::listen_many()
     };
     std::thread thread_object(f, 1);
     thread_object.detach();
+}
+
+
+class udp_response : public response
+{
+public:
+    udp_response()
+    {
+        std::cout << "response::udp_response() NEW @ " + std::to_string(reinterpret_cast<long>(this)) << std::endl;
+//        sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+//        if (!sock)
+//        {
+//            throw std::runtime_error("unable to create udp socket");
+//        }
+//
+//        sockaddr_in local;
+//        local.sin_family = AF_INET;
+//        local.sin_addr.s_addr = INADDR_LOOPBACK;
+//        local.sin_port = 20001; //randomly selected port
+//        if (bind(sock, (sockaddr*)&local, sizeof(local)) == -1)
+//        {
+//            throw std::runtime_error("unable to bind udp socket");
+//        }
+//
+//        struct sockaddr_in sin;
+//        socklen_t addrlen = sizeof(sin);
+//        if (getsockname(sock, (struct sockaddr *)&sin, &addrlen) == 0
+//            && sin.sin_family == AF_INET && addrlen == sizeof(sin))
+//        {
+//            my_id = ntohs(sin.sin_port);
+//        }
+//        else
+//        {
+//            throw std::runtime_error("error determining local port");
+//        }
+    }
+    ~udp_response(){
+        std::cout << "response::~udp_response() DESTRUCT @ " + std::to_string(reinterpret_cast<long>(this)) << std::endl;
+    }
+
+    udp_response(const response&){
+        std::cout << "response::~response(const response&)() COPY @ " + std::to_string(reinterpret_cast<long>(this)) << std::endl;
+    }
+
+    void signal(int error) override
+    {
+        struct sockaddr_in their_addr;
+        their_addr.sin_family = AF_INET;
+        their_addr.sin_port = htons(their_id);
+        their_addr.sin_addr.s_addr = INADDR_LOOPBACK;
+        sendto(sock, &error, sizeof(error), 0, (sockaddr*)&their_addr, sizeof(their_addr));
+    }
+
+    int sock;
+};
+
+
+int DB::slowGet(int milliseconds)
+{
+    std::cout << "DB::slowGet() sleep START, obj_id =  " + std::to_string(reinterpret_cast<long>(this)) << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    std::cout << "DB::slowGet() sleep STOP, obj_id =  " + std::to_string(reinterpret_cast<long>(this)) << std::endl;
+    return 5;
+}
+
+
+DB::~DB(){
+}
+
+DB::DB():
+        responseSharedPtr(new udp_response){
+};
+
+std::shared_ptr<response> DB::getResponseSharedPtr(){
+    return responseSharedPtr;
+}
+
+int DB::getResponseSharedPtrCount(){
+    return responseSharedPtr.use_count();
+}
+
+//response DB::createAndReturnResponse(){
+//    return new udp_response;
+//}
+
+
+response *DB::createAndReturnResponseRawPtr(){
+    return new udp_response;
+}
+
+void DB::deleteResponseRawPtr(response * resp ){
+    delete resp;
 }
