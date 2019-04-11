@@ -1,3 +1,9 @@
+cmake-build-debug
+swig-playground
+libdb/libdb/Generated
+libdb/libdb/obj/
+libdb/libdb/bin/
+libdb/.vs/
 .idea/
 .vscode/
 # Byte-compiled / optimized / DLL files
@@ -7,9 +13,6 @@ __pycache__/
 
 # C extensions
 *.so
-cmake-build-debug
-swig-playground
-
 # Distribution / packaging
 .Python
 build/
