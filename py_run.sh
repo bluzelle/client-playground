@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-python3 src/cpp_connect.py
+python3 src/py/cpp_connect.py
