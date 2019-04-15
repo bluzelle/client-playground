@@ -28,10 +28,10 @@ class response
             return {};
         }
 
-//        std::shared_ptr<database> get_db()
-//        {
-//            return this->db;
-//        }
+        std::shared_ptr<database> get_db()
+        {
+            return this->db;
+        }
 
         // producer
         void set_result(const std::string& result)
@@ -50,17 +50,17 @@ class response
             this->signal(error);
         }
 
-//        void set_db(std::shared_ptr<database> db_ptr)
-//        {
-//            this->db = db_ptr;
-//        }
+        void set_db(std::shared_ptr<database> db_ptr)
+        {
+            this->db = db_ptr;
+        }
 
     protected:
         int my_id = 0;
         int their_id = 0;
         std::string result_str;
-        std::atomic<bool> ready = ATOMIC_VAR_INIT(false);
-        //std::shared_ptr<database> db;
+        std::atomic<bool> ready = false;
+        std::shared_ptr<database> db;
 
         virtual void signal(int error) = 0;
 };
@@ -71,15 +71,17 @@ class DB
 {
 
 private:
-  std::shared_ptr<response> responseSharedPtr;
+    std::shared_ptr<response> responseSharedPtr;
 public:
   DB();
   ~DB();
 
   void listen_many();
   int slowGet(int milliseconds);
-  std::shared_ptr<response> makeResponseSharedPtr();
-  void setResponseSharedPtr(std::shared_ptr<response>);
+  std::shared_ptr<response> getResponseSharedPtr();
+  //response createAndReturnResponse();
+  response *createAndReturnResponseRawPtr();
+  void deleteResponseRawPtr(response * resp );
   int getResponseSharedPtrCount();
 };
 
