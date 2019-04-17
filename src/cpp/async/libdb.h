@@ -66,20 +66,29 @@ class response
 };
 
 
+class test{
+public:
+        test(){};
+        ~test() {};
+        virtual void run_timer(int t) = 0;
+        virtual void do_something() = 0;
+        virtual int increment_an_int(int x) = 0;
+        virtual std::shared_ptr<response> makeResponseSharedPtr() = 0;
+        virtual void setResponseSharedPtr(std::shared_ptr<response>) = 0;
+        virtual int getResponseSharedPtrCount() = 0;
+};
+
+
 
 class DB
 {
 
-private:
-  std::shared_ptr<response> responseSharedPtr;
 public:
   DB();
   ~DB();
 
   void listen_many();
   int slowGet(int milliseconds);
-  std::shared_ptr<response> makeResponseSharedPtr();
-  void setResponseSharedPtr(std::shared_ptr<response>);
-  int getResponseSharedPtrCount();
+  std::shared_ptr<test> newTest();
 };
 

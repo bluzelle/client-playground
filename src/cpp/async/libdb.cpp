@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <stdexcept>
 #include <string.h>
+#include <unistd.h>
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -71,9 +72,98 @@ class udp_response : public response
 };
 
 
-std::shared_ptr<response> DB::makeResponseSharedPtr(){
-   return std::make_shared<udp_response>();
+class testimpl: public test{
+
+private:
+    boost::asio::io_context io_context;
+    std::thread *io_thread;
+    boost::asio::signal_set *signals = nullptr;
+    std::shared_ptr<response> responseSharedPtr;
+
+public:
+    testimpl(){
+
+        std::cout << "test::test called" << std::endl;
+
+        // setup signal handler...
+        signals = new boost::asio::signal_set(io_context, SIGINT);
+        signals->async_wait([&](const boost::system::error_code& error, int signal_number)
+        {
+            if (!error)
+            {
+                std::cout << "signal received -- shutting down (" << signal_number << ")";
+                io_context.stop();
+            }
+            else
+            {
+                std::cout << "Error: " << error.value() << ", " << error.category().name() << std::endl;
+            }
+        });
+
+        this->io_thread = new std::thread([&]()
+        {
+            std::cout << "running io_context" << std::endl;
+            auto res = io_context.run();
+            std::cout << "asio loop finished! count = " << res << std::endl;
+        });
+
+    }
+
+    ~testimpl(){
+        std::cout << "test::~test called" << std::endl;
+        this->io_context.stop();
+        this->io_thread->join();
+        delete this->io_thread;
+    }
+
+    std::shared_ptr<response> makeResponseSharedPtr(){
+       return std::make_shared<udp_response>();
+    }
+
+
+    int getResponseSharedPtrCount(){
+        return responseSharedPtr.use_count();
+    }
+
+
+    void setResponseSharedPtr(std::shared_ptr<response> ptr){
+        responseSharedPtr = ptr;
+    }
+
+
+    void run_timer(int t){
+        std::cout << "test::run_timer called with value " << t << std::endl;
+        auto timer = std::make_shared<boost::asio::steady_timer>(io_context, boost::asio::chrono::seconds(t));
+        timer->async_wait([timer, this](const boost::system::error_code& error)
+        {
+            if (!error)
+            {
+                std::cout << "timer fired" << std::endl;
+                responseSharedPtr.get()->set_ready();
+                responseSharedPtr.get()->set_result("CPP_RESULT");
+            }
+            else
+            {
+                std::cout << "Error: " << error.value() << ", " << error.category().name() << std::endl;
+            }
+        });
+    }
+    void do_something(){
+        std::cout << "test::do_something called" << std::endl;
+    }
+
+    int increment_an_int(int x){
+        std::cout << "test::increment_an_int called" << std::endl;
+        return x + 1;
+    }
+};
+
+std::shared_ptr<test> DB::newTest(){
+    return std::make_shared<testimpl>();
 }
+
+
+
 
 void DB::listen_many()
 {
@@ -95,12 +185,3 @@ DB::~DB(){
 DB::DB(){
 };
 
-
-int DB::getResponseSharedPtrCount(){
-    return responseSharedPtr.use_count();
-}
-
-
-void DB::setResponseSharedPtr(std::shared_ptr<response> ptr){
-    responseSharedPtr = ptr;
-}

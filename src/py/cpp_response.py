@@ -6,7 +6,7 @@ import concurrent.futures
 import time
 import uvloop
 import gc
-
+from pprint import pprint
 uvloop.install()
 
 sys.path.extend([os.getcwd()])
@@ -15,11 +15,16 @@ from build import libdb
 
 async def get_via_socket():
     db = libdb.DB()
-    response = db.makeResponseSharedPtr()
-    db.setResponseSharedPtr(response)
-    print(db.getResponseSharedPtrCount())  # 2
+    test = db.newTest()
+    response = test.makeResponseSharedPtr()
+    test.setResponseSharedPtr(response)
+    test.run_timer(2)
+    await asyncio.sleep(4)
+    print("Ready? ",response.is_ready())
+    print("Response? ",response.get_result())
 
     loop = asyncio.get_event_loop()
+
     # reader, writer = await asyncio.open_connection('127.0.0.1', 1234,
     #                                                loop=loop)
     #
