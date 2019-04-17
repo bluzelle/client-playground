@@ -55,6 +55,8 @@ class response
 //            this->db = db_ptr;
 //        }
 
+        virtual void signal(int error) = 0;
+
     protected:
         int my_id = 0;
         int their_id = 0;
@@ -62,7 +64,7 @@ class response
         std::atomic<bool> ready = ATOMIC_VAR_INIT(false);
         //std::shared_ptr<database> db;
 
-        virtual void signal(int error) = 0;
+
 };
 
 
@@ -70,7 +72,7 @@ class test{
 public:
         test(){};
         ~test() {};
-        virtual void run_timer(int t) = 0;
+        virtual void process_request(int timeout) = 0;
         virtual void do_something() = 0;
         virtual int increment_an_int(int x) = 0;
         virtual std::shared_ptr<response> makeResponseSharedPtr() = 0;

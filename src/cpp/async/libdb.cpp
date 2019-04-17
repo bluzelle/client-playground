@@ -13,8 +13,12 @@
 #include <string.h>
 #include <unistd.h>
 
+//#define _GNU_SOURCE
+//#include <boost/stacktrace.hpp>
+
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+
 
 
 using namespace boost::asio;
@@ -60,12 +64,32 @@ class udp_response : public response
         }
 
         void signal(int error) override
-        {
-            struct sockaddr_in their_addr;
-            their_addr.sin_family = AF_INET;
-            their_addr.sin_port = htons(their_id);
-            their_addr.sin_addr.s_addr = INADDR_LOOPBACK;
-            sendto(sock, &error, sizeof(error), 0, (sockaddr*)&their_addr, sizeof(their_addr));
+        {   //std::cout << boost::stacktrace::stacktrace();
+
+            std::cout << "Signalling to host lang at port "  << std::to_string(their_id) << std::endl;
+
+            io_service io_service;
+            ip::udp::socket socket(io_service);
+            ip::udp::endpoint remote_endpoint;
+
+            socket.open(ip::udp::v4());
+
+            remote_endpoint = ip::udp::endpoint(ip::address::from_string("127.0.0.1"), their_id);
+
+            boost::system::error_code err;
+            socket.send_to(buffer("a", 1), remote_endpoint, 0, err);
+
+            socket.close();
+//            int sock;
+//            if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+//                    perror("socket creation failed");
+//                    exit(EXIT_FAILURE);
+//                }
+//            struct sockaddr_in their_addr;
+//            their_addr.sin_family = AF_INET;
+//            their_addr.sin_port = htons(their_id);
+//            their_addr.sin_addr.s_addr = INADDR_LOOPBACK;
+//            sendto(sock, &error, sizeof(error), 0, (sockaddr*)&their_addr, sizeof(their_addr));
         }
 
         int sock;
@@ -131,16 +155,16 @@ public:
     }
 
 
-    void run_timer(int t){
-        std::cout << "test::run_timer called with value " << t << std::endl;
-        auto timer = std::make_shared<boost::asio::steady_timer>(io_context, boost::asio::chrono::seconds(t));
+    void process_request(int timeout){
+        std::cout << "test::process_request called with value " << timeout << std::endl;
+        auto timer = std::make_shared<boost::asio::steady_timer>(io_context, boost::asio::chrono::seconds(timeout));
         timer->async_wait([timer, this](const boost::system::error_code& error)
         {
             if (!error)
             {
-                std::cout << "timer fired" << std::endl;
-                responseSharedPtr.get()->set_ready();
                 responseSharedPtr.get()->set_result("CPP_RESULT");
+                std::cout << "cpp timer fired -> cpp result is ready! "  << std::endl;
+                responseSharedPtr.get()->set_ready();
             }
             else
             {
